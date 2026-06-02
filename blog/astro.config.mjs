@@ -2,6 +2,7 @@ import { defineConfig } from 'astro/config';
 
 export default defineConfig({
   site: 'https://chetankatke.github.io/legal-research-blog/',
+  base: '/legal-research-blog',
   i18n: {
     defaultLocale: 'en',
     locales: ['en', 'mr', 'hi', 'ta', 'bn', 'te', 'kn', 'ml', 'gu', 'pa'],
