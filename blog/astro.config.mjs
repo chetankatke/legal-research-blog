@@ -1,7 +1,6 @@
 import { defineConfig } from 'astro/config';
 import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
-import tailwind from '@astrojs/tailwind';
 import expressiveCode from 'astro-expressive-code';
 import icon from 'astro-icon';
 import robotsTxt from 'astro-robots-txt';
@@ -73,9 +72,6 @@ export default defineConfig({
       useThemedScrollbars: false,
     }),
     icon(),
-    tailwind({
-      applyBaseStyles: false,
-    }),
     sitemap({
       changefreq: 'weekly',
       priority: 0.7,
