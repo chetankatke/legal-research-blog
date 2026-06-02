@@ -32,7 +32,25 @@ const customModel = process.env.CUSTOM_MODEL
         wrapGenerate: async ({ doGenerate }) => {
           const result = await doGenerate();
           if (result.text) {
-            result.text = result.text.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+            let text = result.text;
+            // 1. Strip <think> reasoning blocks
+            text = text.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+            // 2. Strip markdown code block fences
+            text = text.replace(/```(?:json)?\s*([\s\S]*?)```/g, '$1').trim();
+            // 3. If it contains JSON, try to extract just the JSON
+            const firstBrace = text.indexOf('{');
+            const lastBrace = text.lastIndexOf('}');
+            if (firstBrace !== -1 && lastBrace > firstBrace) {
+              text = text.slice(firstBrace, lastBrace + 1);
+            }
+            result.text = text;
+            // 4. Also clean rawResponse text (used by some AI SDK internals)
+            if (result.rawResponse) {
+              const rawText = result.rawResponse.text || result.text;
+              result.rawResponse.text = typeof rawText === 'string'
+                ? rawText.replace(/<think>[\s\S]*?<\/think>/g, '').replace(/```(?:json)?\s*([\s\S]*?)```/g, '$1').trim()
+                : rawText;
+            }
           }
           return result;
         },
