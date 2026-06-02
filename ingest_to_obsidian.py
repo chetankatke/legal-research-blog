@@ -52,7 +52,10 @@ def get_api_key() -> str | None:
 
 
 def call_llm(prompt: str, max_tokens: int = 500) -> str:
-    """Call MiniMax API and return the assistant content (without thinking block)."""
+    """Call MiniMax API and return the assistant content (without thinking block).
+
+    Retries once if response is empty after stripping think blocks.
+    """
     if os.environ.get("MINIMAX_OFFLINE") == "1":
         return ""
     key = get_api_key()
@@ -68,15 +71,19 @@ def call_llm(prompt: str, max_tokens: int = 500) -> str:
         headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
         method="POST",
     )
-    try:
-        with urllib.request.urlopen(req, timeout=30) as r:
-            data = json.loads(r.read())
-        content = data["choices"][0]["message"]["content"]
-        # Strip <think>...</think> block (MiniMax-M3 emits reasoning before the answer)
-        content = re.sub(r"<think>.*?</think>", "", content, flags=re.DOTALL).strip()
-        return content
-    except (urllib.error.URLError, urllib.error.HTTPError, KeyError, json.JSONDecodeError):
-        return ""
+    for attempt in range(2):
+        try:
+            with urllib.request.urlopen(req, timeout=60) as r:
+                data = json.loads(r.read())
+            content = data["choices"][0]["message"]["content"]
+            # Strip <think>...</think> block
+            content = re.sub(r"<think>.*?</think>", "", content, flags=re.DOTALL).strip()
+            # Check for meaningful output
+            if len(content) > 20:
+                return content
+        except (urllib.error.URLError, urllib.error.HTTPError, KeyError, json.JSONDecodeError):
+            pass
+    return ""
 
 
 def extract_pdf_text(pdf_path: Path) -> str:

@@ -14,6 +14,7 @@ Behavior:
   - Prints summary table
 """
 import argparse
+import re
 import subprocess
 import sys
 import os
@@ -35,10 +36,19 @@ def find_latest_dir(base: Path) -> Path | None:
     return candidates[0].parent
 
 
-def derive_slug_from_path(pdf_path: Path) -> str:
-    """Derive a case slug from the PDF's parent directory name."""
-    name = pdf_path.parent.name
-    return "".join(c if c.isalnum() or c == "-" else "-" for c in name.lower()).strip("-")
+def derive_slug_from_path(pdf_path: Path) -> str | None:
+    """Try to extract a meaningful slug, return None to let ingest_to_obsidian handle it."""
+    name = pdf_path.stem
+    # If it looks like a hash or citation number, let the ingester figure it out
+    if re.match(r"^[a-f0-9]{16,}$", name, re.IGNORECASE):
+        return None
+    if re.match(r"^\[\d{4}\]", name):
+        return None
+    # Try to return something meaningful
+    slug = re.sub(r"[^a-zA-Z0-9]+", "-", name).strip("-").lower()
+    if len(slug) < 5:
+        return None
+    return slug[:60]
 
 
 def run_ingest(pdf_path: Path, slug: str | None = None) -> bool:
