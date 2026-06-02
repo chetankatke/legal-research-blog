@@ -1,0 +1,68 @@
+---
+import { getAllPosts, getPostSortDate, sortMDByDate } from "@/data/post";
+import PageLayout from "@/layouts/Base.astro";
+import { locales } from "@/site-config";
+import { formatRailDate } from "@/utils/date";
+import { withBase } from "@/utils/path";
+import type { GetStaticPaths, InferGetStaticPropsType } from "astro";
+
+export const getStaticPaths = (async () => {
+	return locales.map((loc) => ({
+		params: { lang: loc.code },
+	}));
+}) satisfies GetStaticPaths;
+
+type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+const { lang } = Astro.params;
+
+const allPosts = await getAllPosts();
+const langPosts = allPosts.filter((p) => p.data.lang === lang);
+const sortedPosts = sortMDByDate(langPosts);
+const totalCount = sortedPosts.length;
+
+const meta = {
+	description: `Read our collection of legal research posts in ${lang.toUpperCase()}.`,
+	title: "Posts",
+};
+---
+
+<PageLayout meta={meta} lang={lang}>
+	<section class="writing" aria-labelledby="writing-label">
+		<div class="section-label" id="writing-label">Writing · {totalCount} posts</div>
+		<div class="timeline">
+			{
+				sortedPosts.map((p, idx) => (
+					<a
+						class="post"
+						data-astro-prefetch
+						href={withBase(`/${lang}/blog/${p.id.replace(/^[a-z]{2}\//, "")}/`)}
+						style={`--i: ${idx}`}
+					>
+						<div class="post-rail">
+							<time class="post-date" datetime={getPostSortDate(p).toISOString()}>
+								{formatRailDate(getPostSortDate(p))}
+							</time>
+							<span class="post-dot" aria-hidden="true" />
+						</div>
+						<div class="post-body">
+							<h2 class="post-title">{p.data.title}</h2>
+							<p class="post-preview">{p.data.description}</p>
+						</div>
+					</a>
+				))
+			}
+		</div>
+	</section>
+</PageLayout>
+
+<style>
+	.writing {
+		margin-bottom: 96px;
+	}
+
+	@media (max-width: 420px) {
+		.writing {
+			margin-bottom: 64px;
+		}
+	}
+</style>

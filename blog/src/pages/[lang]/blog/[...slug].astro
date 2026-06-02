@@ -1,42 +1,38 @@
 ---
-import Layout from '../../../layouts/Layout.astro';
-import { getCollection, render } from 'astro:content';
+import { getAllPosts } from "@/data/post";
+import PostLayout from "@/layouts/BlogPost.astro";
+import { locales } from "@/site-config";
+import { withBase } from "@/utils/path";
+import type { GetStaticPaths, InferGetStaticPropsType } from "astro";
+import { render } from "astro:content";
 
-export async function getStaticPaths() {
-  const posts = await getCollection('blog');
-  return posts.map(post => {
-    // Strip lang prefix from slug for clean URLs
-    const slug = post.id.replace(/^[a-z]{2}\//, '');
-    return {
-      params: { lang: post.data.lang, slug },
-    };
-  });
+export const getStaticPaths = (async () => {
+	const blogEntries = await getAllPosts();
+	const paths = blogEntries.flatMap((entry) => {
+		const entryLang = entry.data.lang;
+		const slug = entry.id.replace(/^[a-z]{2}\//, "");
+		return locales
+			.filter((loc) => loc.code === entryLang)
+			.map((loc) => ({
+				params: { lang: loc.code, slug },
+				props: { entry },
+			}));
+	});
+	return paths;
+}) satisfies GetStaticPaths;
+
+type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+
+const { entry } = Astro.props;
+const { lang } = Astro.params;
+
+if (!entry || entry.data.lang !== lang) {
+	return Astro.redirect(withBase(`/${lang}/`));
 }
 
-const { lang, slug } = Astro.params;
-const posts = await getCollection('blog');
-const post = posts.find(p => {
-  const pSlug = p.id.replace(/^[a-z]{2}\//, '');
-  return pSlug === slug && p.data.lang === lang;
-});
-
-if (!post) {
-  return Astro.redirect(`/${lang}/`);
-}
-const { Content } = await render(post);
+const { Content } = await render(entry);
 ---
 
-<Layout title={post.data.title} description={post.data.description} lang={lang}>
-  <article>
-    <h1>{post.data.title}</h1>
-    <time datetime={post.data.pubDate.toISOString()}>
-      {post.data.pubDate.toLocaleDateString(lang)}
-    </time>
-    {post.data.tags && (
-      <p>
-        Tags: {post.data.tags.map(tag => <span style="margin-right: 0.5rem;">#{tag}</span>)}
-      </p>
-    )}
-    <Content />
-  </article>
-</Layout>
+<PostLayout post={entry}>
+	<Content />
+</PostLayout>

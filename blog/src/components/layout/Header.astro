@@ -1,0 +1,324 @@
+---
+import { locales, menuLinks, siteConfig } from "@/site-config";
+import { withBase } from "@/utils/path";
+import ThemeToggle from "../ThemeToggle.astro";
+
+interface Props {
+	lang?: string;
+}
+
+const { lang = "en" } = Astro.props;
+const url = new URL(Astro.request.url);
+const wordmark = siteConfig.title;
+
+const visibleMenuLinks = menuLinks;
+
+const showMenuIcon = (path: string) => {
+	const langPath = path === "/" ? `/${lang}/` : path === "/posts/" ? `/${lang}/blog/` : path === "/about/" ? `/${lang}/about/` : path;
+	return navIcons[path] ?? "";
+};
+
+/** Build a lang-prefixed navigation path. */
+function navPath(path: string): string {
+	if (path === "/") return withBase(`/${lang}/`);
+	if (path === "/posts/") return withBase(`/${lang}/blog/`);
+	if (path === "/about/") return withBase(`/${lang}/about/`);
+	return withBase(path);
+}
+
+const isActive = (path: string) => {
+	const target = navPath(path);
+	if (path === "/") return url.pathname === target;
+	return url.pathname === target || url.pathname.startsWith(target);
+};
+
+const navIcons: Record<string, string> = {
+	"/": '<path d="M2.5 6.5 8 2l5.5 4.5V13a1 1 0 0 1-1 1h-2.5v-4h-4v4H3.5a1 1 0 0 1-1-1Z"/>',
+	"/posts/":
+		'<path d="M3 2.5h7l3 3V13a.5.5 0 0 1-.5.5h-9.5a.5.5 0 0 1-.5-.5V3a.5.5 0 0 1 .5-.5Z"/><path d="M10 2.5V5.5h3"/><path d="M5.5 8.5h5"/><path d="M5.5 11h3.5"/>',
+	"/showcase/":
+		'<rect x="2" y="4.5" width="12" height="8.5" rx="1"/><path d="M5.5 4.5V3a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v1.5"/>',
+	"/about/":
+		'<circle cx="8" cy="6" r="2.5"/><path d="M3 13c.6-2.4 2.6-3.5 5-3.5s4.4 1.1 5 3.5"/>',
+};
+
+/** Build a locale-switched URL: replace the language prefix in the path, or add one. */
+function localeUrl(code: string): string {
+	const base = withBase("/");
+	// Get path relative to the base
+	const relative = url.pathname.startsWith(base)
+		? url.pathname.slice(base.length - 1) // keep leading /
+		: url.pathname;
+	// Match /{lang}/ or /{lang} at start of relative path
+	const match = relative.match(/^\/([a-z]{2})(\/|$)/);
+	if (match) {
+		const rest = relative.slice(match[0].length - (match[2] ? 0 : 1)) || "/";
+		return withBase(`/${code}${rest}`);
+	}
+	return withBase(`/${code}/`);
+}
+---
+
+<header class="site-header" id="main-header">
+	<a href={withBase("/")} class="wordmark">{wordmark}</a>
+	<div class="header-right">
+		<nav class="nav" aria-label="Primary">
+			{
+				visibleMenuLinks.map((link) => (
+					<a
+						aria-current={isActive(link.path) ? "page" : false}
+						class:list={[{ active: isActive(link.path) }]}
+						data-astro-prefetch
+						href={navPath(link.path)}
+					>
+						<svg
+							aria-hidden="true"
+							viewBox="0 0 16 16"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="1.5"
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							set:html={showMenuIcon(link.path)}
+						/>
+						<span>{link.title}</span>
+					</a>
+				))
+			}
+			<div class="lang-selector">
+				<button class="lang-toggle" aria-expanded="false" aria-label="Select language">
+					{locales.find((l) => l.code === lang)?.native ?? lang}
+					<svg aria-hidden="true" class="lang-chevron" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+						<path d="M4 6l4 4 4-4" />
+					</svg>
+				</button>
+				<div class="lang-dropdown">
+					{locales.map((loc) => (
+						<a
+							href={localeUrl(loc.code)}
+							class:list={["lang-option", { active: loc.code === lang }]}
+							data-astro-prefetch
+						>
+							<span class="lang-native">{loc.native}</span>
+							<span class="lang-label">{loc.label}</span>
+						</a>
+					))}
+				</div>
+			</div>
+		</nav>
+		<ThemeToggle />
+	</div>
+</header>
+
+<script>
+	const toggle = document.querySelector<HTMLButtonElement>(".lang-toggle");
+	const dropdown = document.querySelector<HTMLElement>(".lang-dropdown");
+	if (toggle && dropdown) {
+		toggle.addEventListener("click", () => {
+			const open = toggle.getAttribute("aria-expanded") === "true";
+			toggle.setAttribute("aria-expanded", String(!open));
+		});
+		document.addEventListener("click", (e) => {
+			if (!toggle.contains(e.target as Node) && !dropdown.contains(e.target as Node)) {
+				toggle.setAttribute("aria-expanded", "false");
+			}
+		});
+	}
+</script>
+
+<style>
+	.site-header {
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: 24px;
+		margin-bottom: 72px;
+	}
+	.wordmark {
+		font-family: var(--font-serif);
+		font-size: 17px;
+		font-weight: 500;
+		letter-spacing: -0.01em;
+		color: hsl(var(--theme-text));
+		transition: color 0.2s ease, border-color 0.2s ease;
+	}
+	.wordmark:hover {
+		color: hsl(var(--theme-accent));
+	}
+	.header-right {
+		display: flex;
+		align-items: baseline;
+		gap: 22px;
+	}
+	.nav {
+		display: flex;
+		align-items: baseline;
+		gap: 22px;
+		font-family: var(--font-sans);
+		font-size: 13.5px;
+		color: hsl(var(--theme-text) / 0.72);
+	}
+	.nav a {
+		display: inline-block;
+		position: relative;
+		padding-bottom: 3px;
+		transition: color 0.2s ease;
+	}
+	/* Indicator overhangs the text slightly so the underline isn't abrupt. */
+	.nav a::after {
+		content: "";
+		position: absolute;
+		left: -3px;
+		right: -3px;
+		bottom: 0;
+		height: 1px;
+		background: transparent;
+	}
+	.nav a svg {
+		display: inline-block;
+		width: 14px;
+		height: 14px;
+		stroke: currentColor;
+		vertical-align: -2px;
+		margin-right: 6px;
+	}
+	.nav a:hover {
+		color: hsl(var(--theme-accent));
+	}
+	.nav a.active {
+		color: hsl(var(--theme-text));
+	}
+	.nav a.active::after {
+		background: hsl(var(--theme-accent));
+	}
+
+	/* Language selector */
+	.lang-selector {
+		position: relative;
+	}
+	.lang-toggle {
+		display: inline-flex;
+		align-items: center;
+		gap: 4px;
+		padding: 2px 6px;
+		border: 1px solid var(--hairline);
+		border-radius: 4px;
+		background: var(--paper);
+		color: hsl(var(--theme-text) / 0.72);
+		font-family: var(--font-sans);
+		font-size: 12px;
+		cursor: pointer;
+		transition: color 0.2s ease, border-color 0.2s ease;
+	}
+	.lang-toggle:hover {
+		color: hsl(var(--theme-accent));
+		border-color: hsl(var(--theme-accent) / 0.4);
+	}
+	.lang-chevron {
+		width: 10px;
+		height: 10px;
+		transition: transform 0.2s ease;
+	}
+	.lang-toggle[aria-expanded="true"] .lang-chevron {
+		transform: rotate(180deg);
+	}
+	.lang-dropdown {
+		position: absolute;
+		top: 100%;
+		right: 0;
+		margin-top: 6px;
+		min-width: 180px;
+		background: var(--paper);
+		border: 1px solid var(--hairline);
+		border-radius: 6px;
+		box-shadow: 0 4px 16px hsl(var(--theme-text) / 0.08);
+		display: none;
+		z-index: 50;
+		overflow: hidden;
+	}
+	.lang-toggle[aria-expanded="true"] + .lang-dropdown,
+	.lang-dropdown:has(a:focus-visible) {
+		display: block;
+	}
+	.lang-option {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		gap: 12px;
+		padding: 8px 14px;
+		font-size: 13px;
+		color: hsl(var(--theme-text) / 0.72);
+		text-decoration: none;
+		transition: background-color 0.15s ease, color 0.15s ease;
+	}
+	.lang-option:hover {
+		background: var(--accent-soft);
+		color: hsl(var(--theme-accent));
+	}
+	.lang-option.active {
+		color: hsl(var(--theme-text));
+		font-weight: 500;
+	}
+	.lang-option.active::before {
+		content: "✓";
+		font-size: 11px;
+		margin-right: auto;
+		color: hsl(var(--theme-accent));
+	}
+	.lang-native {
+		font-weight: 500;
+	}
+	.lang-label {
+		font-size: 11.5px;
+		color: hsl(var(--theme-text) / 0.5);
+	}
+
+	@media (max-width: 720px) {
+		.site-header {
+			margin-bottom: 36px;
+			display: grid;
+			grid-template-columns: 1fr auto;
+			grid-template-areas:
+				"wordmark theme"
+				"nav nav";
+			align-items: center;
+			column-gap: 14px;
+			row-gap: 14px;
+		}
+		.wordmark { grid-area: wordmark; }
+		.header-right { display: contents; }
+		.theme-toggle { grid-area: theme; justify-self: end; }
+		.nav {
+			grid-area: nav;
+			gap: 22px;
+			font-size: 13px;
+			flex-wrap: wrap;
+			justify-content: flex-start;
+		}
+		.nav a {
+			/* Add top tap padding; desktop rule keeps the indicator space below. */
+			padding-top: 6px;
+		}
+		.nav a svg {
+			width: 13px;
+			height: 13px;
+		}
+	}
+
+	@media (max-width: 420px) {
+		.site-header {
+			margin-bottom: 28px;
+			row-gap: 12px;
+		}
+		.wordmark {
+			font-size: 16px;
+		}
+		.nav {
+			gap: 18px;
+			font-size: 12.5px;
+		}
+		.nav a svg {
+			display: none;
+		}
+	}
+</style>

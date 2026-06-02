@@ -1,0 +1,115 @@
+---
+import PageLayout from "@/layouts/Base.astro";
+import { siteConfig, locales } from "@/site-config";
+import { absoluteUrl, withBase } from "@/utils/path";
+import type { GetStaticPaths, InferGetStaticPropsType } from "astro";
+
+export const getStaticPaths = (async () => {
+	return locales.map((loc) => ({
+		params: { lang: loc.code },
+	}));
+}) satisfies GetStaticPaths;
+
+type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+const { lang } = Astro.params;
+
+const profile = siteConfig.profile;
+const authorName = profile?.name ?? siteConfig.author;
+
+const meta = {
+	description: `${authorName} — about me.`,
+	title: "About",
+};
+---
+
+<PageLayout meta={meta} lang={lang}>
+	<section class="about" aria-labelledby="about-label">
+		<div class="section-label" id="about-label">About</div>
+		<div class="bio">
+			<p>
+				<strong>{authorName}</strong> — {profile?.jobTitle ?? "Legal Researcher"}.
+			</p>
+			<p>
+				This blog provides in-depth analyses of Indian Supreme Court and High Court judgments,
+				case summaries, and legal research on constitutional law, criminal law, human rights,
+				and landmark Indian legal precedents. Content is available in multiple Indian languages.
+			</p>
+			<ul>
+				{profile?.github && (
+					<li><a href={profile.github} rel="noreferrer" target="_blank">GitHub</a></li>
+				)}
+				{profile?.linkedin && (
+					<li><a href={profile.linkedin} rel="noreferrer" target="_blank">LinkedIn</a></li>
+				)}
+				{profile?.email && (
+					<li><a href={`mailto:${profile.email}`}>Email</a></li>
+				)}
+				<li><a href={withBase(`/${lang}/`)}>Home</a></li>
+			</ul>
+		</div>
+	</section>
+</PageLayout>
+
+<style>
+	.about {
+		margin-bottom: 64px;
+	}
+	.bio {
+		font-family: var(--font-serif);
+		font-size: 17.5px;
+		line-height: 1.75;
+		color: hsl(var(--theme-text));
+		max-width: var(--reading-width);
+	}
+	.bio ul {
+		list-style: disc;
+		list-style-position: inside;
+		margin: 0 0 28px;
+		padding: 0;
+	}
+	.bio ul li {
+		margin-bottom: 6px;
+		text-wrap: pretty;
+		word-wrap: break-word;
+		overflow-wrap: anywhere;
+	}
+	.bio ul li:last-child {
+		margin-bottom: 0;
+	}
+	.bio p {
+		margin: 0 0 22px;
+		text-wrap: pretty;
+	}
+	.bio p:last-child {
+		margin-bottom: 0;
+	}
+	.bio a {
+		color: hsl(var(--theme-text));
+		text-decoration: underline;
+		text-decoration-color: hsl(var(--theme-text) / 0.35);
+		text-decoration-thickness: 1px;
+		text-underline-offset: 3px;
+		transition: color 0.2s ease, text-decoration-color 0.2s ease;
+	}
+	.bio a:hover {
+		color: hsl(var(--theme-accent));
+		text-decoration-color: hsl(var(--theme-accent));
+	}
+	.bio a:focus-visible {
+		outline: 2px solid hsl(var(--theme-accent));
+		outline-offset: 3px;
+		border-radius: 3px;
+	}
+
+	@media (max-width: 720px) {
+		.bio {
+			font-size: 17px;
+			line-height: 1.7;
+		}
+	}
+	@media (max-width: 420px) {
+		.bio {
+			font-size: 16.5px;
+		}
+	}
+</style>
