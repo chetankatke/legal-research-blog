@@ -91,6 +91,12 @@ def sync_vault_to_blog(vault: Path, dry_run: bool = False):
                 if not case_title:
                     case_title = slug.replace("-", " ").title()
                 pub_date = fm.get("translated_at", fm.get("date", datetime.now(timezone.utc).strftime("%Y-%m-%d")))[:10]
+                # Sanitize date
+                import datetime as dt_mod
+                try:
+                    dt_mod.datetime.strptime(pub_date, "%Y-%m-%d")
+                except (ValueError, TypeError):
+                    pub_date = dt_mod.datetime.now(dt_mod.timezone.utc).strftime("%Y-%m-%d")
                 tags = ["legal", "judgment", lang]
 
                 # Build Astro-compatible content
@@ -127,6 +133,12 @@ def sync_vault_to_blog(vault: Path, dry_run: bool = False):
             if not case_title:
                 case_title = slug
             date = fm.get("date", fm.get("ingested_at", ""))[:10]
+            # Sanitize date: if not a valid ISO date, use current date
+            import datetime as dt_mod
+            try:
+                dt_mod.datetime.strptime(date, "%Y-%m-%d")
+            except (ValueError, TypeError):
+                date = dt_mod.datetime.now(dt_mod.timezone.utc).strftime("%Y-%m-%d")
             tags_str = fm.get("tags", "")
 
             body = strip_wikilinks(content)

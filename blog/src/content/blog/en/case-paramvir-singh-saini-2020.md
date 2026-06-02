@@ -1,7 +1,7 @@
 ---
 title: S.C.R. PARAMVIR SINGH SAINI v. BALJIT SINGH & ORS
 description: Full case analysis of S.C.R. PARAMVIR SINGH SAINI v. BALJIT SINGH & ORS
-pubDate: December 0
+pubDate: 2026-06-02
 lang: en
 tags: [legal, judgment, case]
 caseSlug: paramvir-singh-saini-2020
