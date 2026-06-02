@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://chetankatke.github.io/legal-research-blog/sitemap-index.xml

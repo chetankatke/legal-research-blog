@@ -1,0 +1,26 @@
+{
+  "name": "Legal Research Blog",
+  "icons": [
+    {
+      "src": "icons/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "description": "Indian Supreme Court and High Court judgment analyses, case summaries, and legal research",
+  "lang": "en",
+  "start_url": "/legal-research-blog/",
+  "theme_color": "#2bbc8a",
+  "background_color": "#1d1f21",
+  "display": "standalone"
+}
