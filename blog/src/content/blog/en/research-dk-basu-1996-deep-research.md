@@ -1,10 +1,18 @@
 ---
-title: D.K. Basu v. State of West Bengal (1997): Custodial Violence Guidelines and Their Impact on Indian Policing
-description: Deep research report on D.K. Basu v. State of West Bengal 1996 guidelines and their impact on Indian policing
+title: "What impact did D.K. Basu v. State of West Bengal 1996 have on Indian policing?"
+description: "Deep research report"
 pubDate: 2026-06-02
 lang: en
-tags: [research, deep-research, supreme-court, custodial-violence]
-caseSlug: dk-basu-1996
+tags: [research, legal]
+---
+
+---
+type: research
+question: What impact did D.K. Basu v. State of West Bengal 1996 have on Indian policing?
+case: dk-basu-1996
+generated_at: 2026-06-02T15:30:48.092587+00:00
+model: MiniMax-M3
+sources: Firecrawl
 ---
 
 # D.K. Basu v. State of West Bengal (1997): Custodial Violence Guidelines and Their Impact on Indian Policing

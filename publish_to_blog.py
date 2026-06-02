@@ -102,7 +102,17 @@ def sync_vault_to_blog(vault: Path, dry_run: bool = False):
                 # Build Astro-compatible content
                 body = strip_wikilinks(content)
                 astro_fm = build_astro_frontmatter(case_title, lang, slug, pub_date, tags)
-                astro_content = f"---\ntitle: {astro_fm['title']}\ndescription: {astro_fm['description']}\npubDate: {astro_fm['pubDate']}\nlang: {lang}\ntags: {tags}\ncaseSlug: {slug}\n---\n\n{body}"
+                astro_content = (
+                    '---\n'
+                    f'title: "{astro_fm["title"]}"\n'
+                    f'description: "{astro_fm["description"]}"\n'
+                    f'pubDate: {astro_fm["pubDate"]}\n'
+                    f'lang: {lang}\n'
+                    f'tags: {tags}\n'
+                    f'caseSlug: {slug}\n'
+                    '---\n\n'
+                    f'{body}'
+                )
 
                 out_dir = CONTENT_DIR / lang
                 out_dir.mkdir(parents=True, exist_ok=True)
@@ -146,7 +156,17 @@ def sync_vault_to_blog(vault: Path, dry_run: bool = False):
             out_dir.mkdir(parents=True, exist_ok=True)
             out_path = out_dir / f"case-{slug}.md"
 
-            astro_content = f"---\ntitle: {case_title}\ndescription: Full case analysis of {case_title}\npubDate: {date or datetime.now(timezone.utc).strftime('%Y-%m-%d')}\nlang: en\ntags: [legal, judgment, case]\ncaseSlug: {slug}\n---\n\n{body}"
+            astro_content = (
+                '---\n'
+                f'title: "{case_title}"\n'
+                f'description: "Full case analysis of {case_title}"\n'
+                f'pubDate: {date or datetime.now(timezone.utc).strftime("%Y-%m-%d")}\n'
+                'lang: en\n'
+                'tags: [legal, judgment, case]\n'
+                f'caseSlug: {slug}\n'
+                '---\n\n'
+                f'{body}'
+            )
 
             if out_path.exists() and out_path.read_text() == astro_content:
                 skipped += 1
@@ -170,7 +190,16 @@ def sync_vault_to_blog(vault: Path, dry_run: bool = False):
             out_dir.mkdir(parents=True, exist_ok=True)
             out_path = out_dir / f"research-{slug}.md"
 
-            astro_content = f"---\ntitle: {title}\ndescription: Deep research report\npubDate: {pub_date or datetime.now(timezone.utc).strftime('%Y-%m-%d')}\nlang: en\ntags: [research, legal]\n---\n\n{body}"
+            astro_content = (
+                '---\n'
+                f'title: "{title}"\n'
+                'description: "Deep research report"\n'
+                f'pubDate: {pub_date or datetime.now(timezone.utc).strftime("%Y-%m-%d")}\n'
+                'lang: en\n'
+                'tags: [research, legal]\n'
+                '---\n\n'
+                f'{body}'
+            )
 
             if out_path.exists() and out_path.read_text() == astro_content:
                 skipped += 1

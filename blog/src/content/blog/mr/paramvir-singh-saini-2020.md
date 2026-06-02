@@ -1,6 +1,6 @@
 ---
-title: S.C.R. PARAMVIR SINGH SAINI v. BALJIT SINGH & ORS (मराठी अनुवाद)
-description: Legal analysis of S.C.R. PARAMVIR SINGH SAINI v. BALJIT SINGH & ORS (मराठी अनुवाद)
+title: "S.C.R. PARAMVIR SINGH SAINI v. BALJIT SINGH & ORS (मराठी अनुवाद)"
+description: "Legal analysis of S.C.R. PARAMVIR SINGH SAINI v. BALJIT SINGH & ORS (मराठी अनुवाद)"
 pubDate: 2026-06-02
 lang: mr
 tags: ['legal', 'judgment', 'mr']
