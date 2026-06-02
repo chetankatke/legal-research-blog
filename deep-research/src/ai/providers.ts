@@ -24,8 +24,19 @@ const fireworks = process.env.FIREWORKS_KEY
   : undefined;
 
 const customModel = process.env.CUSTOM_MODEL
-  ? openai?.(process.env.CUSTOM_MODEL, {
-      structuredOutputs: false,
+  ? wrapLanguageModel({
+      model: openai?.(process.env.CUSTOM_MODEL, {
+        structuredOutputs: false,
+      }) as LanguageModelV1,
+      middleware: {
+        wrapGenerate: async ({ doGenerate }) => {
+          const result = await doGenerate();
+          if (result.text) {
+            result.text = result.text.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+          }
+          return result;
+        },
+      },
     })
   : undefined;
 
