@@ -1,0 +1,42 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import { getCollection, render } from 'astro:content';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog');
+  return posts.map(post => {
+    // Strip lang prefix from slug for clean URLs
+    const slug = post.id.replace(/^[a-z]{2}\//, '');
+    return {
+      params: { lang: post.data.lang, slug },
+    };
+  });
+}
+
+const { lang, slug } = Astro.params;
+const posts = await getCollection('blog');
+const post = posts.find(p => {
+  const pSlug = p.id.replace(/^[a-z]{2}\//, '');
+  return pSlug === slug && p.data.lang === lang;
+});
+
+if (!post) {
+  return Astro.redirect(`/${lang}/`);
+}
+const { Content } = await render(post);
+---
+
+<Layout title={post.data.title} description={post.data.description} lang={lang}>
+  <article>
+    <h1>{post.data.title}</h1>
+    <time datetime={post.data.pubDate.toISOString()}>
+      {post.data.pubDate.toLocaleDateString(lang)}
+    </time>
+    {post.data.tags && (
+      <p>
+        Tags: {post.data.tags.map(tag => <span style="margin-right: 0.5rem;">#{tag}</span>)}
+      </p>
+    )}
+    <Content />
+  </article>
+</Layout>

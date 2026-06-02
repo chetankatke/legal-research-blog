@@ -1,0 +1,37 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getCollection, render } from 'astro:content';
+
+export async function getStaticPaths() {
+  const locales = ['en', 'mr', 'hi', 'ta', 'bn', 'te', 'kn', 'ml', 'gu', 'pa'];
+  return locales.map(lang => ({ params: { lang } }));
+}
+
+const { lang } = Astro.params;
+const allPosts = await getCollection('blog');
+const posts = allPosts
+  .filter(post => post.data.lang === lang)
+  .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime());
+---
+
+<Layout title="Legal Research Blog" lang={lang}>
+  <h1>Legal Research Blog</h1>
+  <p>Latest articles and case analyses</p>
+  <ul>
+    {posts.map(post => {
+      // Strip lang prefix from slug for clean URLs
+      const slug = post.id.replace(/^[a-z]{2}\//, '');
+      return (
+        <li>
+          <a href={`/${lang}/blog/${slug}`}>
+            <h2>{post.data.title}</h2>
+            <p>{post.data.description}</p>
+            <time datetime={post.data.pubDate.toISOString()}>
+              {post.data.pubDate.toLocaleDateString(lang)}
+            </time>
+          </a>
+        </li>
+      );
+    })}
+  </ul>
+</Layout>
