@@ -1,6 +1,6 @@
 ---
-title: dk-basu-1996
-description: Full case analysis of dk-basu-1996
+title: A D.K. BASU v. STATE OF WEST BENGAL DECEMBER
+description: Full case analysis of A D.K. BASU v. STATE OF WEST BENGAL DECEMBER
 pubDate: 2026-06-02
 lang: en
 tags: [legal, judgment, case]

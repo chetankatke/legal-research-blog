@@ -42,14 +42,14 @@ def strip_wikilinks(text: str) -> str:
 
 
 def extract_frontmatter(text: str) -> dict:
-    """Parse frontmatter from markdown, returning dict."""
+    """Parse frontmatter from markdown, returning dict with case-insensitive keys."""
     result = {}
     m = re.match(r"^---\s*\n(.*?)\n---\s*\n", text, re.DOTALL)
     if m:
         for line in m.group(1).splitlines():
             if ":" in line:
                 key, _, val = line.partition(":")
-                key = key.strip()
+                key = key.strip().lower()
                 val = val.strip().strip('"').strip("'")
                 result[key] = val
     return result
@@ -83,7 +83,13 @@ def sync_vault_to_blog(vault: Path, dry_run: bool = False):
                 slug = note_file.stem
                 content = note_file.read_text()
                 fm = extract_frontmatter(content)
-                case_title = fm.get("title", slug.replace("-", " ").title())
+                case_title = fm.get("title", fm.get("case_title", ""))
+                if not case_title:
+                    heading_m = re.search(r"^#\s+(.+)$", content, re.MULTILINE)
+                    if heading_m:
+                        case_title = heading_m.group(1).strip()
+                if not case_title:
+                    case_title = slug.replace("-", " ").title()
                 pub_date = fm.get("translated_at", fm.get("date", datetime.now(timezone.utc).strftime("%Y-%m-%d")))[:10]
                 tags = ["legal", "judgment", lang]
 
@@ -113,7 +119,13 @@ def sync_vault_to_blog(vault: Path, dry_run: bool = False):
             slug = case_dir.name
             content = readme.read_text()
             fm = extract_frontmatter(content)
-            case_title = fm.get("title", slug)
+            case_title = fm.get("title", fm.get("case_title", ""))
+            if not case_title:
+                heading_m = re.search(r"^#\s+(.+)$", content, re.MULTILINE)
+                if heading_m:
+                    case_title = heading_m.group(1).strip()
+            if not case_title:
+                case_title = slug
             date = fm.get("date", fm.get("ingested_at", ""))[:10]
             tags_str = fm.get("tags", "")
 

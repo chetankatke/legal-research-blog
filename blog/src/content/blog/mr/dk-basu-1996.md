@@ -1,6 +1,6 @@
 ---
-title: Dk Basu 1996
-description: Legal analysis of Dk Basu 1996
+title: A D.K. BASU v. STATE OF WEST BENGAL DECEMBER (मराठी अनुवाद)
+description: Legal analysis of A D.K. BASU v. STATE OF WEST BENGAL DECEMBER (मराठी अनुवाद)
 pubDate: 2026-06-02
 lang: mr
 tags: ['legal', 'judgment', 'mr']
