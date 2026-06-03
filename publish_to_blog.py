@@ -98,6 +98,12 @@ def sync_vault_to_blog(vault: Path, dry_run: bool = False):
                 except (ValueError, TypeError):
                     pub_date = dt_mod.datetime.now(dt_mod.timezone.utc).strftime("%Y-%m-%d")
                 tags = ["legal", "judgment", lang]
+                # Truncate blog title to schema limit (<=120 chars) to avoid Astro build errors.
+                if len(case_title) > 120:
+                    # Prefer to cut at the last separator after 110 chars.
+                    snippet = case_title[:115]
+                    cut = max(snippet.rfind(" vs "), snippet.rfind(" v. "), snippet.rfind(","), snippet.rfind(";"), 110)
+                    case_title = case_title[: cut].rstrip(",; ") + " …"
 
                 # Build Astro-compatible content
                 body = strip_wikilinks(content)
